@@ -16,6 +16,7 @@ namespace SigarettaBot
     public static class Bot
     {
         public static TelegramBotClient Client;
+        public static User Me;
 
         public static void Start()
         {
@@ -29,6 +30,8 @@ namespace SigarettaBot
                 receiverOptions: receiverOptions,
                 cancellationToken: cts.Token
             );
+
+            Me = Client.GetMeAsync().Result;
 
             Console.WriteLine($"BOT: Inizio a ricevere i messaggi!");
             Console.ReadLine();
@@ -45,7 +48,11 @@ namespace SigarettaBot
             if (update.Message == null || update.Message.Type != MessageType.Text) { return; }
 
             //Se invece è un comando
-            if (update.Message.Text.StartsWith("/"))
+            bool isCommand = update.Message.Text.StartsWith("/");
+            bool checkPrivate = update.Message.Chat.Type == ChatType.Private;
+            bool checkGroup = (update.Message.Chat.Type == ChatType.Group && update.Message.Text.EndsWith($"@{Me.Username}"));
+            
+            if (isCommand && (checkPrivate || checkGroup))
             {
                 await HandleTelegramCommands(update, client);
             }
@@ -53,8 +60,14 @@ namespace SigarettaBot
 
         public async static Task HandleTelegramCommands(Update update, ITelegramBotClient botClient)
         {
+            //Doppio controllo per assicurarsi che sia un messaggio di testo
             string? incomingMessage = update?.Message?.Text;
             if (incomingMessage == null) return;
+
+            //Se nel messaggio è presente cancelliamo la parte @sigarettagiocobot
+            string suffix = $"@{Me.Username}";
+            if (incomingMessage.EndsWith(suffix))
+                incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf(suffix));
 
             string inputCommand = "";
             string[]? parameters = new string[] { };
@@ -79,6 +92,10 @@ namespace SigarettaBot
                     if (commandAttribute.OnlyGroup && update.Message.Chat.Type == ChatType.Private)
                     {
                         await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Questo comando è solo per i gruppi");
+                    }
+                    else if (commandAttribute.OnlyAdmins && update.ChatMember.NewChatMember.Status != ChatMemberStatus.Administrator)
+                    {
+                        await botClient.SendTextMessageAsync(update.Message.Chat.Id, "❌ Questo comando è solo per gli admin");
                     }
                     else
                     {

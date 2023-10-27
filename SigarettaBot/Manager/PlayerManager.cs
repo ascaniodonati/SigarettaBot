@@ -1,4 +1,5 @@
-﻿using SigarettaBot.Models;
+﻿using SigarettaBot.Exceptions;
+using SigarettaBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,8 @@ namespace SigarettaBot.Manager
 
             if (selected == null)
             {
+                if (user.Username == null) throw new NoUsernameException("⚠️ Per favore, imposta un username per giocare");
+
                 Player newPlayer = new Player
                 {
                     Id = user.Id,

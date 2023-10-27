@@ -1,4 +1,5 @@
-﻿using SigarettaBot.Manager;
+﻿using SigarettaBot.Exceptions;
+using SigarettaBot.Manager;
 using SigarettaBot.Models;
 using System;
 using System.Collections.Generic;
@@ -66,8 +67,16 @@ namespace SigarettaBot.Commands
                 return;
             }
 
-            //Tutto è andato bene? Aggiungiamo il giocatore
-            selectedGame.AddPlayer(PlayerManager.GetPlayer(sender));
+            try
+            {
+                //Tutto è andato bene? Aggiungiamo il giocatore
+                selectedGame.AddPlayer(PlayerManager.GetPlayer(sender));
+            }
+            catch (NoUsernameException ex)
+            {
+                //Se l'username non è impostato viene generata questa eccezione
+                botClient.SendTextMessageAsync(update.Message.From.Id, ex.Message);
+            }
         }
 
         [Command(Trigger = "leave", OnlyGroup = false)]
