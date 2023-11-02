@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,18 @@ namespace SigarettaBot.Models
 {
     public class Game
     {
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public long[] Players { get; set; }
-        public bool InGame { get; set; } = false;
+        public int GameId { get; set; }
+
+        public long ChatId { get; set; }
+        public long StarterId { get; set; }
+
+        List<Player> Players { get; set; } = new();
+        PhrasePacket Phrases { get; set; } = new();
+    }
+
+    public class PhrasePacket
+    {
+        public int Id { get; set; }
+        public string? Phrases { get; set; }
     }
 }

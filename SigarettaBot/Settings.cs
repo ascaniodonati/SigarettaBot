@@ -9,10 +9,33 @@ namespace SigarettaBot
 {
     internal static class Settings
     {
+        //Impostazioni del bot
         public static string API_TOKEN = "2075040018:AAHEncRh5o66CxeWE6o0X_ULPtaVpcLQxfo";
 
-        const string mongoDbStr = $"mongodb+srv://{user}:{pwd}@sigarettabot.2gsudwr.mongodb.net/?retryWrites=true&w=majority\";";
-        const string user = "adonati";
-        const string pwd = "Kg3Jb7l8xw7fagOw";
+        //Impostazioni del database
+        const string DbHost = "localhost";
+        const string DbUsername = "sigaretta";
+        const string DbSchema = "sigaretta";
+        const string DbPassword = "Ssigaretta.98s";
+        public static string DbConnectionString = $"server={DbHost};database={DbSchema};user={DbUsername};password={DbPassword}";
+
+        //Impostazioni del gioco
+        public static List<string> DEFAULT_PHRASES
+        {
+            get
+            {
+                return new List<string>()
+                {
+                    "Chi è lui?",
+                    "Chi è lei?",
+                    "Cosa stanno facendo?",
+                    "Dove?",
+                    "Quando?",
+                    "Cosa ha detto lui?",
+                    "Cosa ha detto lei?",
+                    "Cosa pensa la gente di loro??",
+                };
+            }
+        }
     }
 }

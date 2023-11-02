@@ -22,7 +22,7 @@ namespace SigarettaBot.Commands
                 return;
             }
 
-            Sigaretta sigaretta = new Sigaretta(update.Message.Chat.Id);
+            Sigaretta sigaretta = new Sigaretta(update.Message.Chat.Id, update.Message.From.Id);
             GameManager.AddGame(sigaretta);
         }
 
@@ -102,7 +102,52 @@ namespace SigarettaBot.Commands
             }
 
             //Test superati? Bene, puoi andartene
-            selected.LeavePlayer(playerLeaving);
+            selected.KickPlayer(playerLeaving);
+        }
+
+        [Command(Trigger = "kick", OnlyGroup = true)]
+        public static void Kick(Update update, ITelegramBotClient botClient, string[] parameters)
+        {
+            long chatId = update.Message.Chat.Id;
+
+            Sigaretta sigaretta = GameManager.GetSigarette.FirstOrDefault(x => x.chatId == chatId);
+
+            if (sigaretta == null) {
+                botClient.SendTextMessageAsync(chatId, "❌ Non c'è nessuna partita in corso");
+                return;
+            }
+
+            //Per ora da C# non c'è modo di controllare se qualcuno è admin del gruppo
+            //bool isSenderAdmin = update.ChatMember.NewChatMember.Status == Telegram.Bot.Types.Enums.ChatMemberStatus.Administrator;
+            //bool isSenderCreator = update.ChatMember.NewChatMember.Status == Telegram.Bot.Types.Enums.ChatMemberStatus.Creator;
+            
+            //Il comando è stato lanciato da chi ha fatto partire il gioco?
+            bool isSenderStarter = update.Message.From.Id == sigaretta.starterId;
+
+            if (isSenderStarter)
+            {
+                if (parameters.Length == 0)
+                {
+                    botClient.SendTextMessageAsync(chatId, "⚠️ Indica chi vuoi espellere dalla partita");
+                    return;
+                } 
+                else
+                {
+                    //Togliamo la chiocciola all'inizio se presente
+                    string playerUserToKick = parameters[0].StartsWith("@") ? parameters[0].Substring(1) : parameters[0];
+                    Player playerToKick = sigaretta.GetPlayer.FirstOrDefault(x => x.TgInfo.Username == playerUserToKick);
+
+                    if (playerToKick == null)
+                    {
+                        botClient.SendTextMessageAsync(chatId, "❌ Non ho trovato il giocatore da cacciare");
+                        return;
+                    }
+                    else
+                    {
+                        sigaretta.KickPlayer(playerToKick, kicked: true);
+                    }
+                }
+            }
         }
     }
 }

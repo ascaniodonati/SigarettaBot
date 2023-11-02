@@ -48,11 +48,7 @@ namespace SigarettaBot
             if (update.Message == null || update.Message.Type != MessageType.Text) { return; }
 
             //Se invece è un comando
-            bool isCommand = update.Message.Text.StartsWith("/");
-            bool checkPrivate = update.Message.Chat.Type == ChatType.Private;
-            bool checkGroup = (update.Message.Chat.Type == ChatType.Group && update.Message.Text.EndsWith($"@{Me.Username}"));
-            
-            if (isCommand && (checkPrivate || checkGroup))
+            if (update.Message.Text.StartsWith("/"))
             {
                 await HandleTelegramCommands(update, client);
             }
@@ -66,8 +62,8 @@ namespace SigarettaBot
 
             //Se nel messaggio è presente cancelliamo la parte @sigarettagiocobot
             string suffix = $"@{Me.Username}";
-            if (incomingMessage.EndsWith(suffix))
-                incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf(suffix));
+            if (incomingMessage.Contains(suffix))
+                incomingMessage = incomingMessage.Replace(suffix, "");
 
             string inputCommand = "";
             string[]? parameters = new string[] { };
